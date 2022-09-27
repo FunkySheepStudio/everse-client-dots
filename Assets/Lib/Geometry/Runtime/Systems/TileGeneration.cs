@@ -1,11 +1,8 @@
 using Unity.Entities;
 using Unity.Mathematics;
-using FunkySheep.Geometry;
-using Unity.Rendering;
-using UnityEngine;
 using Unity.Jobs;
 
-namespace FunkySheep.Terrain
+namespace FunkySheep.Geometry
 {
     public partial class TileGeneration : SystemBase
     {
@@ -44,8 +41,8 @@ namespace FunkySheep.Terrain
                         uvs.Add(new Uv
                         {
                             Value = new float3(
-                                x * 1 / tileComponent.size,
-                                z * 1 / tileComponent.size,
+                                (float)x * 1 / (float)tileComponent.count,
+                                (float)z * 1 / (float)tileComponent.count,
                                 0
                             )
                         });

@@ -1,5 +1,6 @@
 using Unity.Entities;
-using Unity.Jobs;
+using Unity.Transforms;
+using FunkySheep.Geometry;
 
 namespace FunkySheep.Terrain
 {
@@ -17,15 +18,23 @@ namespace FunkySheep.Terrain
             EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities.ForEach((Entity entity, in TerrainComponent terrainComponent, in TilePrefab tilePrefab) => {
-                for (int z = 0; z < terrainComponent.size; z++)
+                for (int z = 0; z < terrainComponent.Cachesize; z++)
                 {
-                    for (int x = 0; x < terrainComponent.size; x++)
+                    for (int x = 0; x < terrainComponent.Cachesize; x++)
                     {
                         Entity tile = ecb.Instantiate(x + z * x, tilePrefab.Value);
+
+                        ecb.SetComponent<Translation>(x + z * x, tile, new Translation {
+                            Value = new Unity.Mathematics.float3(
+                                x * terrainComponent.TileItemsCount * terrainComponent.TileItemSize,
+                                0,
+                                z * terrainComponent.TileItemsCount * terrainComponent.TileItemSize
+                            )
+                        });
+
                         ecb.SetComponent<TileComponent>(x + z * x, tile, new TileComponent {
-                            count = terrainComponent.tile.count,
-                            size = terrainComponent.tile.size,
-                            position = new Unity.Mathematics.int2(x, z)
+                            count = terrainComponent.TileItemsCount,
+                            size = terrainComponent.TileItemSize
                         });
                     }
 

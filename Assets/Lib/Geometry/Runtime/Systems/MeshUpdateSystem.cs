@@ -5,9 +5,9 @@ using Unity.Rendering;
 using UnityEngine;
 using Unity.Jobs;
 
-namespace FunkySheep.Terrain
+namespace FunkySheep.Geometry
 {
-    public partial class MeshUpdate : SystemBase
+    public partial class MeshUpdateSystem : SystemBase
     {
         protected override void OnUpdate()
         {

@@ -226,10 +226,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed71f715f23c05746883d40e9b6bc786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  size: 1
-  tile:
-    position:
-      x: 0
-      y: 0
-    size: 1
-    count: 4
+  Cachesize: 4
+  TileItemsCount: 5
+  TileItemSize: 1

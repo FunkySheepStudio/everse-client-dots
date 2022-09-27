@@ -6,7 +6,8 @@ namespace FunkySheep.Terrain
     [GenerateAuthoringComponent]
     public struct TerrainComponent : IComponentData
     {
-        public int size;
-        public TileComponent tile;
+        public int Cachesize;
+        public int TileItemsCount;
+        public int TileItemSize;
     }
 }
