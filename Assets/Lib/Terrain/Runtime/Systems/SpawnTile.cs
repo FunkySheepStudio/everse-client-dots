@@ -1,7 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using FunkySheep.Geometry;
+using FunkySheep.Maps;
 
 namespace FunkySheep.Terrain
 {
@@ -17,7 +17,7 @@ namespace FunkySheep.Terrain
         {
             EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
-            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawner tileSpawner, in Translation translation, in TerrainTilePrefab terrainTilePrefab) =>
+            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawner tileSpawner, in Translation translation, in TerrainTilePrefab terrainTilePrefab, in MapPosition mapPosition, in ZoomLevel zoomLevel) =>
             {
                 int2 newtilePosition = new int2(
                     (int) translation.Value.x / tileSpawner.size,
@@ -38,6 +38,9 @@ namespace FunkySheep.Terrain
                             newtilePosition.y * tileSpawner.size
                         )
                     });
+
+                    ecb.SetComponent<MapPosition>(entityInQueryIndex, tile, mapPosition);
+                    ecb.SetComponent<ZoomLevel>(entityInQueryIndex, tile, zoomLevel);
                 }
 
             }).ScheduleParallel();

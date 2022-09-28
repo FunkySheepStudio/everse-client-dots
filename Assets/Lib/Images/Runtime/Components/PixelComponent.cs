@@ -3,7 +3,8 @@ using Unity.Mathematics;
 
 namespace FunkySheep.Images
 {
-    public struct PixelComponent : IComponentData
+    [GenerateAuthoringComponent]
+    public struct PixelComponent : IBufferElementData
     {
         public int4 Value;
     }

@@ -46,6 +46,15 @@ namespace FunkySheep.Earth
             return (yToLat(position.y), xToLon(position.x));
         }
 
+        public static double2 toGeoCoordDouble2(float2 position)
+        {
+            return new double2
+            {
+                x = yToLat(position.y),
+                y = xToLon(position.x)
+            };
+        }
+
         public static double lonToX(double lon)
         {
             return R_MAJOR * DegToRad(lon);

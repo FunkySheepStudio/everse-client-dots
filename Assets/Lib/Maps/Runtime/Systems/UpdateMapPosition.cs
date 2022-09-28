@@ -4,7 +4,8 @@ using FunkySheep.Earth;
 
 namespace FunkySheep.Maps
 {
-    public partial class CalculateMapPosition : SystemBase
+    [UpdateAfter(typeof(UpdateGpsPosition))]
+    public partial class UpdateMapPosition : SystemBase
     {
         protected override void OnUpdate()
         {

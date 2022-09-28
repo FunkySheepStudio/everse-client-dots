@@ -13,9 +13,12 @@ GameObject:
   - component: {fileID: 9056102607534595072}
   - component: {fileID: 9056102607534595100}
   - component: {fileID: 127974227338000928}
+  - component: {fileID: 6783173248830369808}
+  - component: {fileID: 7523244061357477248}
   - component: {fileID: 1449888174024957594}
   - component: {fileID: 8278968934312915677}
   - component: {fileID: 4395198767449216287}
+  - component: {fileID: 7975120746866620837}
   m_Layer: 0
   m_Name: Terrain-Tile
   m_TagString: Untagged
@@ -115,6 +118,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   size: 1
   count: 10
+--- !u!114 &6783173248830369808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9056102607534595074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e201e1d6703cadb458786df3eb1abf84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Value:
+    x: 0
+    y: 0
+--- !u!114 &7523244061357477248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9056102607534595074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d46d77e998bc58449d493621dc81188, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Value: 0
 --- !u!114 &1449888174024957594
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,6 +182,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c45aa293e7b345748a1d8fa0b2204e67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Values: []
+--- !u!114 &7975120746866620837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9056102607534595074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2d8408feaf0c5347a34a9a057cda6c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Values: []
