@@ -1,28 +1,55 @@
 using Unity.Entities;
-using Unity.Mathematics;
-using FunkySheep.Geometry;
 using Unity.Rendering;
 using UnityEngine;
-using Unity.Jobs;
+using UnityEngine.Rendering;
+
 
 namespace FunkySheep.Geometry
 {
     public partial class MeshUpdateSystem : SystemBase
     {
+        EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
+        public Material material;
+
+        protected override void OnCreate()
+        {
+            m_EndSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        }
+
         protected override void OnUpdate()
         {
+            EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
             Entities
-                .WithStructuralChanges()
-                .WithoutBurst()
-                .ForEach((Entity entity, DynamicBuffer<Vertex> vertexBuffer, DynamicBuffer<Triangle> trianglesBuffer, DynamicBuffer<Uv> uvsBuffer, in RenderMesh meshRenderer, in MeshUpdateTag meshUpdateTag) =>
+                .ForEach((Entity entity, int entityInQueryIndex, DynamicBuffer <Vertex> vertexBuffer, DynamicBuffer<Triangle> trianglesBuffer, DynamicBuffer<Uv> uvsBuffer, in MeshUpdateTag meshUpdateTag) =>
                 {
-                    meshRenderer.mesh.Clear();
-                    meshRenderer.mesh.SetVertices(vertexBuffer.AsNativeArray().Reinterpret<Vector3>());
-                    meshRenderer.mesh.SetIndices(trianglesBuffer.AsNativeArray(), MeshTopology.Triangles, 0);
-                    meshRenderer.mesh.SetUVs(0, uvsBuffer.AsNativeArray().Reinterpret<Vector3>());
-                    meshRenderer.mesh.RecalculateNormals();
-                    World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<MeshUpdateTag>(entity);
-                }).Run();
+                    var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+
+                    Mesh mesh = new Mesh();
+                    mesh.Clear();
+                    mesh.SetVertices(vertexBuffer.AsNativeArray().Reinterpret<Vector3>());
+                    mesh.SetIndices(trianglesBuffer.AsNativeArray(), MeshTopology.Triangles, 0);
+                    mesh.SetUVs(0, uvsBuffer.AsNativeArray().Reinterpret<Vector3>());
+                    mesh.RecalculateNormals();
+
+                    var desc = new RenderMeshDescription(
+                        mesh,
+                        material,
+                        shadowCastingMode: ShadowCastingMode.Off,
+                        receiveShadows: false);
+
+                    RenderMeshUtility.AddComponents(
+                        entity,
+                        entityManager,
+                        desc);
+
+                    ecb.RemoveComponent<MeshUpdateTag>(entityInQueryIndex, entity);
+                })
+                .WithoutBurst()
+                .WithStructuralChanges()
+                .Run();
+
+                m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
         }
     }
 }

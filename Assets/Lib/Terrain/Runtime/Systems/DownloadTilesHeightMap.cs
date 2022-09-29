@@ -11,32 +11,16 @@ namespace FunkySheep.Terrain
 {
     public partial class DownloadTilesHeightMap : SystemBase
     {
-        async Task<NativeArray<PixelComponent>> Download(string url)
+        EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
+
+        protected override void OnCreate()
         {
-            NativeArray<PixelComponent> pixelBuffer = new NativeArray<PixelComponent>();
-
-            UnityWebRequest request = UnityWebRequestTexture.GetTexture(url, false);
-            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
-
-            while (!operation.isDone)
-                await Task.Yield();
-
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                Texture2D texture = DownloadHandlerTexture.GetContent(request);
-                texture.wrapMode = TextureWrapMode.Clamp;
-                texture.filterMode = FilterMode.Point;
-                pixelBuffer = texture.GetRawTextureData<PixelComponent>();
-            } else
-            {
-                Debug.Log("Unable to download height map from: " + url);
-            }
-
-            return pixelBuffer;
+            m_EndSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         }
 
         protected override void OnUpdate()
         {
+            EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
             Entities.ForEach((Entity entity, in TileComponent tileComponent, in MapPosition mapPosition, in ZoomLevel zoomLevel) =>
             {
                 string url = $"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{zoomLevel.Value}/{(int)mapPosition.Value.x}/{(int)mapPosition.Value.y}.png";
@@ -54,6 +38,31 @@ namespace FunkySheep.Terrain
             .WithStructuralChanges()
             .WithoutBurst()
             .Run();
+        }
+
+        async Task<NativeArray<PixelComponent>> Download(string url)
+        {
+            NativeArray<PixelComponent> pixelBuffer = new NativeArray<PixelComponent>();
+
+            UnityWebRequest request = UnityWebRequestTexture.GetTexture(url, false);
+            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
+
+            while (!operation.isDone)
+                await Task.Yield();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Texture2D texture = DownloadHandlerTexture.GetContent(request);
+                texture.wrapMode = TextureWrapMode.Clamp;
+                texture.filterMode = FilterMode.Point;
+                pixelBuffer = texture.GetRawTextureData<PixelComponent>();
+            }
+            else
+            {
+                Debug.Log("Unable to download height map from: " + url);
+            }
+
+            return pixelBuffer;
         }
     }
 }
