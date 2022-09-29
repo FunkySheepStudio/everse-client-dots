@@ -9,12 +9,13 @@ using Unity.Collections;
 
 namespace FunkySheep.Terrain
 {
-    public partial class GetTerrainHeights : SystemBase
+    public partial class DownloadTilesHeightMap : SystemBase
     {
-
-        async Task<byte[]> Download(string url)
+        async Task<NativeArray<PixelComponent>> Download(string url)
         {
-            UnityWebRequest request = UnityWebRequest.Get(url);
+            NativeArray<PixelComponent> pixelBuffer = new NativeArray<PixelComponent>();
+
+            UnityWebRequest request = UnityWebRequestTexture.GetTexture(url, false);
             UnityWebRequestAsyncOperation operation = request.SendWebRequest();
 
             while (!operation.isDone)
@@ -22,23 +23,16 @@ namespace FunkySheep.Terrain
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                byte[] file = request.downloadHandler.data;
-                return file;
-
+                Texture2D texture = DownloadHandlerTexture.GetContent(request);
+                texture.wrapMode = TextureWrapMode.Clamp;
+                texture.filterMode = FilterMode.Point;
+                Debug.Log(texture.format);
+                pixelBuffer = texture.GetRawTextureData<PixelComponent>();
             } else
             {
                 Debug.Log("Unable to download height map from: " + url);
-                return null;
             }
-        }
 
-        static NativeArray<PixelComponent> SetHeights(byte[] file, Entity entity)
-        {
-            Texture2D texture = new Texture2D(256, 256);
-            texture.LoadImage(file);
-            texture.wrapMode = TextureWrapMode.Clamp;
-            texture.filterMode = FilterMode.Point;
-            NativeArray<PixelComponent> pixelBuffer = texture.GetRawTextureData<PixelComponent>();
             return pixelBuffer;
         }
 
@@ -50,17 +44,13 @@ namespace FunkySheep.Terrain
                 Download(url)
                 .ContinueWith((t) =>
                 {
-                    if (t.Result != null)
-                    {
-                        DynamicBuffer<PixelComponent> pixelBuffer = GetBuffer<PixelComponent>(entity);
-                        pixelBuffer.CopyFrom(SetHeights(t.Result, entity).ToArray());
-                        Debug.Log("test");
-                    }
+                    DynamicBuffer<PixelComponent> pixelBuffer = GetBuffer<PixelComponent>(entity);
+                    pixelBuffer.CopyFrom(t.Result.ToArray());
                 });
 
-                /*World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<TileComponent>(entity);
+                World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<TileComponent>(entity);
                 World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<MapPosition>(entity);
-                World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<ZoomLevel>(entity);*/
+                World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<ZoomLevel>(entity);
             })
             .WithStructuralChanges()
             .WithoutBurst()
