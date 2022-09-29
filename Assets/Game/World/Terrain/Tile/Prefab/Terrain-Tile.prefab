@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9056102607534595073}
   - component: {fileID: 9056102607534595072}
   - component: {fileID: 9056102607534595100}
-  - component: {fileID: 127974227338000928}
+  - component: {fileID: 6262607957401504212}
   - component: {fileID: 6783173248830369808}
   - component: {fileID: 7523244061357477248}
   - component: {fileID: 1449888174024957594}
@@ -104,7 +104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ConversionMode: 0
---- !u!114 &127974227338000928
+--- !u!114 &6262607957401504212
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -117,7 +117,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   size: 1
-  count: 10
+  count: 256
 --- !u!114 &6783173248830369808
 MonoBehaviour:
   m_ObjectHideFlags: 0

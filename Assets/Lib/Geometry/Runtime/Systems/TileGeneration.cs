@@ -1,6 +1,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Jobs;
+using UnityEngine;
 
 namespace FunkySheep.Geometry
 {
@@ -13,85 +13,79 @@ namespace FunkySheep.Geometry
             m_EndSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         }
 
-        protected override void OnStartRunning()
+        protected override void OnUpdate()
         {
             EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
-            Entities.ForEach((Entity entity, int entityInQueryIndex, in TileComponent tileComponent) =>
+            Entities.ForEach((Entity entity, int entityInQueryIndex, in TileComponent tileCompoent, in DynamicBuffer<TileDataComponent> tileDataComponent, in TileMapUpdateComponentTag tileMapUpdateComponentTag) =>
             {
                 DynamicBuffer<Vertex> vertices = GetBuffer<Vertex>(entity);
                 DynamicBuffer<Triangle> triangles = GetBuffer<Triangle>(entity);
                 DynamicBuffer<Uv> uvs = GetBuffer<Uv>(entity);
 
-                for (int z = 0; z <= tileComponent.count; z++)
+                for (int i = 0; i < tileDataComponent.Length; i++)
                 {
-                    for (int x = 0; x <= tileComponent.count; x++)
+                    int count = (int)Mathf.Sqrt(tileDataComponent.Length);
+                    float x = tileDataComponent[i].Value.x;
+                    float y = tileDataComponent[i].Value.y;
+                    float z = tileDataComponent[i].Value.z;
+
+                    // indexes
+                    vertices.Add(new Vertex { Value = tileDataComponent[i].Value });
+
+                    // Uvs
+                    uvs.Add(new Uv
                     {
-                        // indexes
-                        vertices.Add(new Vertex
+                        Value = new float3(
+                            x * 1 / count,
+                            z * 1 / count,
+                            0
+                        )
+                    });
+
+                    //Triangles
+                    if (x != (count - 1) && z != (count - 1))
+                    {
+                        // First triangle
+                        triangles.Add(new Triangle
                         {
-                            Value = new float3(
-                                x * tileComponent.size,
-                                0,
-                                z * tileComponent.size
-                            )
+                            Value = i
                         });
 
-                        // Uvs
-                        uvs.Add(new Uv
+                        triangles.Add(new Triangle
                         {
-                            Value = new float3(
-                                (float)x * 1 / (float)tileComponent.count,
-                                (float)z * 1 / (float)tileComponent.count,
-                                0
-                            )
+                            Value = i + 1
                         });
 
-                        //Triangles
-                        if (x != tileComponent.count && z != tileComponent.count)
+                        triangles.Add(new Triangle
                         {
-                            // First triangle
-                            triangles.Add(new Triangle
-                            {
-                                Value = x + z * (tileComponent.count + 1)
-                            });
+                            Value = i + count + 1
+                        });
 
-                            triangles.Add(new Triangle
-                            {
-                                Value = x + 1 + (z + 1) * (tileComponent.count + 1)
-                            });
+                       
+                        // Second triangle
+                        triangles.Add(new Triangle
+                        {
+                            Value = i
+                        });
 
-                            triangles.Add(new Triangle
-                            {
-                                Value = x + 1 + z * (tileComponent.count + 1)
-                            });
+                        triangles.Add(new Triangle
+                        {
+                            Value = i + count + 1
+                        });
 
-                            // Second triangle
-                            triangles.Add(new Triangle
-                            {
-                                Value = x + z * (tileComponent.count + 1)
-                            });
-
-                            triangles.Add(new Triangle
-                            {
-                                Value = x + (z + 1) * (tileComponent.count + 1)
-                            });
-
-                            triangles.Add(new Triangle
-                            {
-                                Value = x + 1 + (z + 1) * (tileComponent.count + 1)
-                            });
-                        }
+                        triangles.Add(new Triangle
+                        {
+                            Value = i + count
+                        });
                     }
                 }
-
+                //ecb.RemoveComponent<TileDataComponent>(entityInQueryIndex, entity);
+                ecb.RemoveComponent<TileMapUpdateComponentTag>(entityInQueryIndex, entity);
                 ecb.AddComponent<MeshUpdateTag>(entityInQueryIndex, entity);
             }).Schedule();
-        }
 
-        protected override void OnUpdate()
-        {
-            
+            m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
         }
     }
 }

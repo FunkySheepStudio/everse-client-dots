@@ -1,23 +1,59 @@
 using UnityEngine;
 using Unity.Entities;
+using Unity.Mathematics;
 using FunkySheep.Images;
+using FunkySheep.Geometry;
 
 namespace FunkySheep.Terrain
 {
     public partial class UpdateTileHeights : SystemBase
     {
+        EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
+
+        protected override void OnCreate()
+        {
+            m_EndSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        }
+
         protected override void OnUpdate()
         {
-            Entities.ForEach((ref DynamicBuffer<TileHeights> tileHeights, in DynamicBuffer<PixelComponent> pixelComponents) =>
+            EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
+
+            Entities.ForEach((Entity entity, int entityInQueryIndex, ref DynamicBuffer<TileDataComponent> tileDataComponents, in DynamicBuffer<PixelComponent> pixelComponents) =>
             {
                 for (int x = 0; x < Mathf.Sqrt(pixelComponents.Length); x++)
                 {
-                    for (int y = 0; y < Mathf.Sqrt(pixelComponents.Length); y++)
+                    for (int z = 0; z < Mathf.Sqrt(pixelComponents.Length); z++)
                     {
+                        Color32 color = pixelComponents[
+                            z +
+                            x * (int)Mathf.Sqrt(pixelComponents.Length)
+                        ].Value;
 
+                        float height = GetHeightFromColor(color, x, z);
+                        tileDataComponents.Add(new TileDataComponent
+                        {
+                            Value = new float3
+                            {
+                                x = x,
+                                y = height,
+                                z = z
+                            }
+                        });
                     }
                 }
+
+                ecb.RemoveComponent<PixelComponent>(entityInQueryIndex, entity);
+                ecb.AddComponent<TileMapUpdateComponentTag>(entityInQueryIndex, entity);
             }).ScheduleParallel();
+
+            m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
+        }
+
+        private static float GetHeightFromColor(Color32 color, int x, int y)
+        {
+            float height = (Mathf.Floor(color.g * 256.0f) + Mathf.Floor(color.b) + color.a / 256) - 32768.0f;
+            return height;
         }
     }
 }

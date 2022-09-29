@@ -26,7 +26,6 @@ namespace FunkySheep.Terrain
                 Texture2D texture = DownloadHandlerTexture.GetContent(request);
                 texture.wrapMode = TextureWrapMode.Clamp;
                 texture.filterMode = FilterMode.Point;
-                Debug.Log(texture.format);
                 pixelBuffer = texture.GetRawTextureData<PixelComponent>();
             } else
             {
@@ -46,9 +45,9 @@ namespace FunkySheep.Terrain
                 {
                     DynamicBuffer<PixelComponent> pixelBuffer = GetBuffer<PixelComponent>(entity);
                     pixelBuffer.CopyFrom(t.Result.ToArray());
+                    World.DefaultGameObjectInjectionWorld.EntityManager.AddComponent<TileDataComponent>(entity);
                 });
 
-                World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<TileComponent>(entity);
                 World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<MapPosition>(entity);
                 World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<ZoomLevel>(entity);
             })
