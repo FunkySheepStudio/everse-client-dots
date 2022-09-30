@@ -1,45 +1,38 @@
 using Unity.Entities;
-using Unity.Transforms;
-using Unity.Mathematics;
 using FunkySheep.Dots;
+using Unity.Jobs;
+using Unity.Transforms;
 
 namespace FunkySheep.Earth
 {
     [UpdateBefore(typeof(UpdateLastTranslation))]
     public partial class UpdateMercatorPosition : SystemBase
     {
-        protected override void OnStartRunning()
+        public JobHandle updateMercatorPositionJobHandle { get; private set; }
+        private EntityQuery query;
+
+        protected override void OnCreate()
         {
-            Entities.ForEach((ref MercatorPosition mercatorPosition, in GpsPosition gpsPosition) =>
-            {
-                float2 newMercatorPosition = Utils.toCartesianFloat2(gpsPosition.Value);
-                if (!mercatorPosition.Value.Equals(newMercatorPosition))
-                {
-                    mercatorPosition.Value = newMercatorPosition;
-                }
-                mercatorPosition.Initial = mercatorPosition.Value;
-            }).ScheduleParallel();
+            this.query = GetEntityQuery(typeof(MercatorPosition), typeof(Translation), typeof(LastTranslation));
         }
 
         protected override void OnUpdate()
         {
-            Entities.ForEach((ref MercatorPosition mercatorPosition, in Translation translation, in LastTranslation lastTranslation) =>
+            JobHandle updateLastTranslationJobHandle = World.GetOrCreateSystem<UpdateLastTranslation>().updateLastTranslationJobHandle;
+            JobHandle initMercatorPositionJobHandle = World.GetOrCreateSystem<InitMercatorPosition>().initMercatorPositionJobHandle;
+            JobHandle updateGpsPositionJobHandle = World.GetOrCreateSystem<UpdateGpsPosition>().updateGpsPositionJobHandle;
+
+            this.Dependency = JobHandle.CombineDependencies(updateLastTranslationJobHandle, initMercatorPositionJobHandle, updateGpsPositionJobHandle);
+
+            UpdateMercatorPositionJob updateMercatorPositionJob = new UpdateMercatorPositionJob
             {
-                if (!translation.Value.Equals(lastTranslation.Value))
-                {
-                    mercatorPosition.Value += new float2
-                    {
-                        x = translation.Value.x - lastTranslation.Value.x,
-                        y = translation.Value.z - lastTranslation.Value.z,
-                    };
-                }
+                mercatorPositionType = GetComponentTypeHandle<MercatorPosition>(),
+                translationType = GetComponentTypeHandle<Translation>(),
+                lastTranslationType = GetComponentTypeHandle<LastTranslation>()
+            };
 
-            }).ScheduleParallel();
-        }
-
-        void SetMercatorPosition(MercatorPosition mercatorPosition, GpsPosition gpsPosition)
-        {
-            
+            updateMercatorPositionJobHandle = updateMercatorPositionJob.ScheduleParallel(query, this.Dependency);
+            this.Dependency = updateMercatorPositionJobHandle;
         }
     }
 }

@@ -1,20 +1,29 @@
 using Unity.Entities;
 using Unity.Transforms;
+using Unity.Jobs;
 
 namespace FunkySheep.Dots
 {
     public partial class UpdateLastTranslation : SystemBase
     {
+        public JobHandle updateLastTranslationJobHandle;
+        private EntityQuery query;
+
+        protected override void OnCreate()
+        {
+            this.query = GetEntityQuery(typeof(LastTranslation), typeof(Translation));
+        }
+
         protected override void OnUpdate()
         {
-            Entities.ForEach((ref LastTranslation lastTranslation, in Translation translation) =>
+            UpdateLastPositionJob job = new UpdateLastPositionJob()
             {
-                if (!translation.Value.Equals(lastTranslation.Value))
-                {
-                    lastTranslation.Value = translation.Value;
-                }
-            }).ScheduleParallel();
+                translationType = GetComponentTypeHandle<Translation>(),
+                lastTranslationType = GetComponentTypeHandle<LastTranslation>(),
+            };
+
+            updateLastTranslationJobHandle = job.ScheduleParallel(this.query, this.Dependency);
+            this.Dependency = updateLastTranslationJobHandle;
         }
     }
-
 }
