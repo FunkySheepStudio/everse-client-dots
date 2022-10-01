@@ -6,11 +6,9 @@ using UnityEngine;
 using UnityEngine.Networking;
 using FunkySheep.Images;
 using Unity.Collections;
-using FunkySheep.Earth;
 
 namespace FunkySheep.Terrain
 {
-    [DisableAutoCreationAttribute]
     public partial class DownloadTilesHeightMap : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
@@ -23,10 +21,10 @@ namespace FunkySheep.Terrain
         protected override void OnUpdate()
         {
             EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
+
             Entities.ForEach((Entity entity, in TileComponent tileComponent, in MapPositionComponent mapPosition) =>
             {
                 int zoomLevel = GetSingleton<MapSingletonComponent>().zoomLevel;
-
                 string url = $"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{zoomLevel}/{(int)mapPosition.Value.x}/{(int)mapPosition.Value.y}.png";
                 Download(url)
                 .ContinueWith((t) =>

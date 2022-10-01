@@ -6,7 +6,6 @@ using FunkySheep.Maps;
 
 namespace FunkySheep.Terrain
 {
-    [DisableAutoCreation]
     public partial class SpawnTile : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
@@ -21,26 +20,21 @@ namespace FunkySheep.Terrain
 
             float tileSize = GetSingleton<MapSingletonComponent>().tileSize;
 
-            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawnerComponent tileSpawner, in Translation translation, in TerrainTilePrefabComponent terrainTilePrefab, in MapPositionComponent mapPosition) =>
+            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawnerComponent tileSpawner, in TilePositionComponent tilePositionComponent, in TerrainTilePrefabComponent terrainTilePrefab, in MapPositionComponent mapPosition) =>
             {
 
-                int2 newtilePosition = new int2(
-                    (int) (translation.Value.x / tileSize),
-                    (int) (translation.Value.z / tileSize)
-                );
-
-                if (!tileSpawner.currentPosition.Equals(newtilePosition))
+                if (!tileSpawner.currentPosition.Equals(mapPosition.Value))
                 {
-                    tileSpawner.currentPosition = newtilePosition;
+                    tileSpawner.currentPosition = mapPosition.Value;
 
                     Entity tile = ecb.Instantiate(entityInQueryIndex, terrainTilePrefab.Value);
 
                     ecb.SetComponent<Translation>(entityInQueryIndex, tile, new Translation
                     {
                         Value = new Unity.Mathematics.float3(
-                            newtilePosition.x * tileSize,
+                            tilePositionComponent.Value.x * tileSize,
                             0,
-                            newtilePosition.y * tileSize
+                            tilePositionComponent.Value.y * tileSize
                         )
                     });
 

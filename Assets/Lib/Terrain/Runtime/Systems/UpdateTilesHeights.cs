@@ -3,10 +3,10 @@ using Unity.Entities;
 using Unity.Mathematics;
 using FunkySheep.Images;
 using FunkySheep.Geometry;
+using FunkySheep.Maps;
 
 namespace FunkySheep.Terrain
 {
-    [DisableAutoCreationAttribute]
     public partial class UpdateTileHeights : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
@@ -19,9 +19,12 @@ namespace FunkySheep.Terrain
         protected override void OnUpdate()
         {
             EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
+            float tileSize = GetSingleton<MapSingletonComponent>().tileSize;
 
             Entities.ForEach((Entity entity, int entityInQueryIndex, ref DynamicBuffer<TileDataComponent> tileDataComponents, in DynamicBuffer<PixelComponent> pixelComponents) =>
             {
+                float step = tileSize / Mathf.Sqrt(pixelComponents.Length);
+
                 for (int x = 0; x < Mathf.Sqrt(pixelComponents.Length); x++)
                 {
                     for (int z = 0; z < Mathf.Sqrt(pixelComponents.Length); z++)
