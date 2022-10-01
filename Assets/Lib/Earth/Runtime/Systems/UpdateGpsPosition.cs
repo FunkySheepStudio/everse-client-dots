@@ -1,6 +1,7 @@
 using Unity.Entities;
-using FunkySheep.Dots;
+using FunkySheep.Transform;
 using Unity.Jobs;
+using FunkySheep.Maps;
 
 namespace FunkySheep.Earth
 {
@@ -12,20 +13,21 @@ namespace FunkySheep.Earth
 
         protected override void OnCreate()
         {
-            this.query = GetEntityQuery(typeof(GpsPosition), typeof(MercatorPosition), typeof(LastTranslation));
+            this.query = GetEntityQuery(typeof(GpsPositionComponent), typeof(MercatorPositionComponent), typeof(DeltaTranslationComponent));
         }
 
         protected override void OnUpdate()
         {
             JobHandle UpdateMercatorPositionJobHandle = World.GetOrCreateSystem<UpdateMercatorPosition>().updateMercatorPositionJobHandle;
             JobHandle initMercatorPositionJobHandle = World.GetOrCreateSystem<InitMercatorPosition>().initMercatorPositionJobHandle;
+            JobHandle updateMapPositionJobHandle = World.GetOrCreateSystem<UpdateMapPosition>().updateMapPositionJobHandle;
 
-            this.Dependency = JobHandle.CombineDependencies(UpdateMercatorPositionJobHandle, initMercatorPositionJobHandle);
+            this.Dependency = JobHandle.CombineDependencies(UpdateMercatorPositionJobHandle, initMercatorPositionJobHandle, updateMapPositionJobHandle);
 
             UpdateGpsPositionJob updateGpsPositionJob = new UpdateGpsPositionJob
             {
-                gpsPositionType = GetComponentTypeHandle<GpsPosition>(),
-                mercatorPositionType = GetComponentTypeHandle<MercatorPosition>()
+                gpsPositionType = GetComponentTypeHandle<GpsPositionComponent>(),
+                mercatorPositionType = GetComponentTypeHandle<MercatorPositionComponent>()
             };
 
             updateGpsPositionJobHandle = updateGpsPositionJob.ScheduleParallel(query, this.Dependency);

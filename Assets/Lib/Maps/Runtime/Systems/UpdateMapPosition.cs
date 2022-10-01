@@ -1,23 +1,38 @@
 using Unity.Entities;
-using Unity.Mathematics;
 using FunkySheep.Earth;
+using Unity.Jobs;
 
 namespace FunkySheep.Maps
 {
     [UpdateAfter(typeof(UpdateGpsPosition))]
     public partial class UpdateMapPosition : SystemBase
     {
+        public JobHandle updateMapPositionJobHandle;
+        private EntityQuery query;
+
+        protected override void OnCreate()
+        {
+            this.query = GetEntityQuery(typeof(MapPositionComponent), typeof(TilePositionComponent));
+        }
+
         protected override void OnUpdate()
         {
-            Entities.ForEach((ref MapPosition mapPosition, in ZoomLevel zoomLevel, in GpsPosition gpsPosition) =>
-            {
-                float2 newMapPosition = Utils.GpsToMapRealFloat2(zoomLevel.Value, gpsPosition.Value);
-                if (!mapPosition.Value.Equals(newMapPosition))
-                {
-                    mapPosition.Value = newMapPosition;
-                }
+            JobHandle updateGpsPositionJobHandle = World.GetOrCreateSystem<UpdateGpsPosition>().updateGpsPositionJobHandle;
 
-            }).ScheduleParallel();
+            this.Dependency = JobHandle.CombineDependencies(this.Dependency, updateGpsPositionJobHandle);
+
+            MapSingletonComponent mapSingletonComponent = GetSingleton<MapSingletonComponent>();
+
+            UpdateMapPositionJob updateMapPositionJob = new UpdateMapPositionJob
+            {
+                MapPositionComponentType = GetComponentTypeHandle<MapPositionComponent>(),
+                TilePositionComponentType = GetComponentTypeHandle<TilePositionComponent>(),
+                initialMapPosition = mapSingletonComponent.initialMapPosition
+            };
+
+            updateMapPositionJobHandle = updateMapPositionJob.ScheduleParallel(this.query, this.Dependency);
+
+            this.Dependency = JobHandle.CombineDependencies(this.Dependency, updateMapPositionJobHandle);
         }
     }
 }

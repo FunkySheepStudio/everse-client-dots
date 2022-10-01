@@ -6,6 +6,7 @@ using FunkySheep.Geometry;
 
 namespace FunkySheep.Terrain
 {
+    [DisableAutoCreationAttribute]
     public partial class UpdateTileHeights : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;

@@ -3,7 +3,7 @@ using Unity.Entities;
 namespace FunkySheep.Terrain
 {
     [GenerateAuthoringComponent]
-    public struct TerrainTilePrefab : IComponentData
+    public struct TerrainTilePrefabComponent : IComponentData
     {
         public Entity Value;
     }

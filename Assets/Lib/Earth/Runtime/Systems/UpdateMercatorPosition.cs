@@ -1,11 +1,11 @@
 using Unity.Entities;
-using FunkySheep.Dots;
+using FunkySheep.Transform;
 using Unity.Jobs;
 using Unity.Transforms;
 
 namespace FunkySheep.Earth
 {
-    [UpdateBefore(typeof(UpdateLastTranslation))]
+    [UpdateBefore(typeof(UpdateDeltaTranslation))]
     public partial class UpdateMercatorPosition : SystemBase
     {
         public JobHandle updateMercatorPositionJobHandle { get; private set; }
@@ -13,12 +13,12 @@ namespace FunkySheep.Earth
 
         protected override void OnCreate()
         {
-            this.query = GetEntityQuery(typeof(MercatorPosition), typeof(Translation), typeof(LastTranslation));
+            this.query = GetEntityQuery(typeof(MercatorPositionComponent), typeof(DeltaTranslationComponent));
         }
 
         protected override void OnUpdate()
         {
-            JobHandle updateLastTranslationJobHandle = World.GetOrCreateSystem<UpdateLastTranslation>().updateLastTranslationJobHandle;
+            JobHandle updateLastTranslationJobHandle = World.GetOrCreateSystem<UpdateDeltaTranslation>().updateDeltaTranslationJobHandle;
             JobHandle initMercatorPositionJobHandle = World.GetOrCreateSystem<InitMercatorPosition>().initMercatorPositionJobHandle;
             JobHandle updateGpsPositionJobHandle = World.GetOrCreateSystem<UpdateGpsPosition>().updateGpsPositionJobHandle;
 
@@ -26,9 +26,8 @@ namespace FunkySheep.Earth
 
             UpdateMercatorPositionJob updateMercatorPositionJob = new UpdateMercatorPositionJob
             {
-                mercatorPositionType = GetComponentTypeHandle<MercatorPosition>(),
-                translationType = GetComponentTypeHandle<Translation>(),
-                lastTranslationType = GetComponentTypeHandle<LastTranslation>()
+                mercatorPositionType = GetComponentTypeHandle<MercatorPositionComponent>(),
+                deltaTranslationType = GetComponentTypeHandle<DeltaTranslationComponent>()
             };
 
             updateMercatorPositionJobHandle = updateMercatorPositionJob.ScheduleParallel(query, this.Dependency);

@@ -1,10 +1,12 @@
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Jobs;
 using Unity.Transforms;
 using FunkySheep.Maps;
 
 namespace FunkySheep.Terrain
 {
+    [DisableAutoCreation]
     public partial class SpawnTile : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
@@ -17,11 +19,14 @@ namespace FunkySheep.Terrain
         {
             EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
-            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawner tileSpawner, in Translation translation, in TerrainTilePrefab terrainTilePrefab, in MapPosition mapPosition, in ZoomLevel zoomLevel) =>
+            float tileSize = GetSingleton<MapSingletonComponent>().tileSize;
+
+            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawnerComponent tileSpawner, in Translation translation, in TerrainTilePrefabComponent terrainTilePrefab, in MapPositionComponent mapPosition) =>
             {
+
                 int2 newtilePosition = new int2(
-                    (int) translation.Value.x / tileSpawner.size,
-                    (int) translation.Value.z / tileSpawner.size
+                    (int) (translation.Value.x / tileSize),
+                    (int) (translation.Value.z / tileSize)
                 );
 
                 if (!tileSpawner.currentPosition.Equals(newtilePosition))
@@ -33,18 +38,24 @@ namespace FunkySheep.Terrain
                     ecb.SetComponent<Translation>(entityInQueryIndex, tile, new Translation
                     {
                         Value = new Unity.Mathematics.float3(
-                            newtilePosition.x * tileSpawner.size,
+                            newtilePosition.x * tileSize,
                             0,
-                            newtilePosition.y * tileSpawner.size
+                            newtilePosition.y * tileSize
                         )
                     });
 
-                    ecb.SetComponent<MapPosition>(entityInQueryIndex, tile, mapPosition);
-                    ecb.SetComponent<ZoomLevel>(entityInQueryIndex, tile, zoomLevel);
+                    ecb.SetComponent<MapPositionComponent>(entityInQueryIndex, tile, mapPosition);
                 }
 
             }).ScheduleParallel();
             m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
+        }
+
+        public struct SpawnTileJob : IJobEntityBatch
+        {
+            public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
+            {
+            }
         }
     }
 }

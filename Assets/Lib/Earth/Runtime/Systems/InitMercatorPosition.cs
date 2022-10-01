@@ -13,7 +13,7 @@ namespace FunkySheep.Earth
         protected override void OnCreate()
         {
             m_EndSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-            this.query = GetEntityQuery(typeof(MercatorPosition), typeof(GpsPosition), typeof(InitMercatorPositionComponentTag));
+            this.query = GetEntityQuery(typeof(MercatorPositionComponent), typeof(GpsPositionComponent), typeof(InitMercatorPositionComponentTag));
         }
 
         protected override void OnUpdate()
@@ -25,8 +25,8 @@ namespace FunkySheep.Earth
 
             InitMercatorPositionJob initMercatorPosition = new InitMercatorPositionJob
             {
-                mercatorPositionType = GetComponentTypeHandle<MercatorPosition>(),
-                gpsPositionType = GetComponentTypeHandle<GpsPosition>()
+                mercatorPositionType = GetComponentTypeHandle<MercatorPositionComponent>(),
+                gpsPositionType = GetComponentTypeHandle<GpsPositionComponent>()
             };
 
             initMercatorPositionJobHandle = initMercatorPosition.ScheduleParallel(query, this.Dependency);

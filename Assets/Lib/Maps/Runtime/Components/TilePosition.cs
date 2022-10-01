@@ -4,7 +4,7 @@ using Unity.Mathematics;
 namespace FunkySheep.Maps
 {
     [GenerateAuthoringComponent]
-    public struct MapPositionComponent : IComponentData
+    public struct TilePositionComponent : IComponentData
     {
         public int2 Value;
     }

@@ -4,9 +4,9 @@ using Unity.Mathematics;
 namespace FunkySheep.Terrain
 {
     [GenerateAuthoringComponent]
-    public struct TileSpawner : IComponentData
+    public struct TileSpawnerComponent : IComponentData
     {
         public int2 currentPosition;
-        public int size;
+        //public int size;
     }
 }

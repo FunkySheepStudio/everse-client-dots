@@ -1,40 +1,34 @@
 ﻿using Unity.Entities;
 using Unity.Collections;
-using Unity.Transforms;
 using Unity.Mathematics;
-using FunkySheep.Dots;
+using FunkySheep.Transform;
+using Unity.Burst;
 
 namespace FunkySheep.Earth
 {
+    [BurstCompile]
     public struct UpdateMercatorPositionJob : IJobEntityBatch
     {
-        public ComponentTypeHandle<MercatorPosition> mercatorPositionType;
+        public ComponentTypeHandle<MercatorPositionComponent> mercatorPositionType;
         [ReadOnly]
-        public ComponentTypeHandle<Translation> translationType;
-        [ReadOnly]
-        public ComponentTypeHandle<LastTranslation> lastTranslationType;
+        public ComponentTypeHandle<DeltaTranslationComponent> deltaTranslationType;
 
         public void Execute(ArchetypeChunk batchInChunk, int batchIndex)
         {
-            NativeArray<MercatorPosition> mercatorPositions = batchInChunk.GetNativeArray(this.mercatorPositionType);
-            NativeArray<Translation> translations = batchInChunk.GetNativeArray(this.translationType);
-            NativeArray<LastTranslation> lastTranslations = batchInChunk.GetNativeArray(this.lastTranslationType);
+            NativeArray<MercatorPositionComponent> mercatorPositions = batchInChunk.GetNativeArray(this.mercatorPositionType);
+            NativeArray<DeltaTranslationComponent> deltaTranslations = batchInChunk.GetNativeArray(this.deltaTranslationType);
 
             for (int i = 0; i < batchInChunk.Count; i++)
             {
-                MercatorPosition mercatorPosition = mercatorPositions[i];
-                Translation translation = translations[i];
-                LastTranslation lastTranslation = lastTranslations[i];
-                if (!translation.Equals(lastTranslation.Value))
+                MercatorPositionComponent mercatorPosition = mercatorPositions[i];
+                DeltaTranslationComponent deltaTranslation = deltaTranslations[i];
+                mercatorPosition.Value += new float2
                 {
-                    mercatorPosition.Value += new float2
-                    {
-                        x = translation.Value.x - lastTranslation.Value.x,
-                        y = translation.Value.z - lastTranslation.Value.z,
-                    };
+                    x = deltaTranslation.Value.x,
+                    y = deltaTranslation.Value.z,
+                };
 
-                    mercatorPositions[i] = mercatorPosition;
-                }
+                mercatorPositions[i] = mercatorPosition;
             }
         }
     }
