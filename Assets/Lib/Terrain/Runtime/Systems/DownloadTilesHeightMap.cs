@@ -9,6 +9,7 @@ using Unity.Collections;
 
 namespace FunkySheep.Terrain
 {
+    [DisableAutoCreation]
     public partial class DownloadTilesHeightMap : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
@@ -20,21 +21,21 @@ namespace FunkySheep.Terrain
 
         protected override void OnUpdate()
         {
-            EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
-
-            Entities.ForEach((Entity entity, in TileComponent tileComponent, in MapPositionComponent mapPosition) =>
+            Entities.ForEach((Entity entity, int entityInQueryIndex,  ref TileComponent tileComponent, in MapPositionComponent mapPosition) =>
             {
+                EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
+
                 int zoomLevel = GetSingleton<MapSingletonComponent>().zoomLevel;
                 string url = $"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{zoomLevel}/{(int)mapPosition.Value.x}/{(int)mapPosition.Value.y}.png";
-                Download(url)
-                .ContinueWith((t) =>
+                World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<MapPositionComponent>(entity);
+                Task<NativeArray<PixelComponent>> pixelComponents = Download(url);
+                pixelComponents.ContinueWith((t) =>
                 {
                     DynamicBuffer<PixelComponent> pixelBuffer = GetBuffer<PixelComponent>(entity);
                     pixelBuffer.CopyFrom(t.Result.ToArray());
-                    World.DefaultGameObjectInjectionWorld.EntityManager.AddComponent<TileDataComponent>(entity);
+                    ecb.AddBuffer<TileDataComponent>(entityInQueryIndex, entity);
+                    pixelComponents.Dispose();
                 });
-
-                World.DefaultGameObjectInjectionWorld.EntityManager.RemoveComponent<MapPositionComponent>(entity);
             })
             .WithStructuralChanges()
             .WithoutBurst()

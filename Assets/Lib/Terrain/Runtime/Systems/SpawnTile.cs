@@ -1,48 +1,37 @@
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Jobs;
 using Unity.Transforms;
 using FunkySheep.Maps;
+using UnityEngine;
 
 namespace FunkySheep.Terrain
 {
     public partial class SpawnTile : SystemBase
     {
-        EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
+        public HeightMapDownloader heightMapDownloader;
         protected override void OnCreate()
         {
-            m_EndSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            heightMapDownloader = GameObject.FindObjectOfType<HeightMapDownloader>();
         }
 
         protected override void OnUpdate()
         {
-            EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
-
-            float tileSize = GetSingleton<MapSingletonComponent>().tileSize;
-
-            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawnerComponent tileSpawner, in TilePositionComponent tilePositionComponent, in TerrainTilePrefabComponent terrainTilePrefab, in MapPositionComponent mapPosition) =>
+            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawnerComponent tileSpawner, in TilePositionComponent tilePositionComponent, in MapPositionComponent mapPosition) =>
             {
+                MapSingletonComponent mapSingleton = GetSingleton<MapSingletonComponent>();
 
                 if (!tileSpawner.currentPosition.Equals(mapPosition.Value))
                 {
                     tileSpawner.currentPosition = mapPosition.Value;
 
-                    Entity tile = ecb.Instantiate(entityInQueryIndex, terrainTilePrefab.Value);
-
-                    ecb.SetComponent<Translation>(entityInQueryIndex, tile, new Translation
-                    {
-                        Value = new Unity.Mathematics.float3(
-                            tilePositionComponent.Value.x * tileSize,
-                            0,
-                            tilePositionComponent.Value.y * tileSize
-                        )
-                    });
-
-                    ecb.SetComponent<MapPositionComponent>(entityInQueryIndex, tile, mapPosition);
+                    string url = $"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{mapSingleton.zoomLevel}/{mapPosition.Value.x}/{mapPosition.Value.y}.png";
+                    heightMapDownloader.Download(url);
                 }
 
-            }).ScheduleParallel();
-            m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
+            })
+            .WithStructuralChanges()
+            .WithoutBurst()
+            .Run();
         }
 
         public struct SpawnTileJob : IJobEntityBatch

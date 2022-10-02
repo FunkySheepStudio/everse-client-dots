@@ -8,5 +8,6 @@ namespace FunkySheep.Geometry
     {
         public int size;
         public int count;
+        public bool created;
     }
 }
