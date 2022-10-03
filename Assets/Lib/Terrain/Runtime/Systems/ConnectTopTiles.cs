@@ -7,7 +7,7 @@ using FunkySheep.Maps;
 
 namespace FunkySheep.Terrain
 {
-    public partial class ConnectTiles : SystemBase
+    public partial class ConnectTopTiles : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
 
@@ -38,7 +38,7 @@ namespace FunkySheep.Terrain
                     if (bottomGridPosition.Equals(bottomTile))
                     {
                         DynamicBuffer<Vertex> bottomVertices = GetBuffer<Vertex>(bottomEntities[i]);
-                        int count = (int)(Mathf.Sqrt(bottomVertices.Length));
+                        int count = 256;
 
                         for (int j = 0; j < count; j++)
                         {
@@ -49,7 +49,7 @@ namespace FunkySheep.Terrain
                                     {
                                         x = bottomVertices[j].Value.x,
                                         y = bottomVertices[j].Value.y,
-                                        z = bottomVertices[j].Value.z + bottomTile.y * tileSize //Shift to the world position
+                                        z = tileSize + tileComponent.step //Shift to the world position
                                     }
                                 }
                                );
@@ -72,34 +72,34 @@ namespace FunkySheep.Terrain
                                 // First triangle
                                 triangles.Add(new Triangle
                                 {
-                                    Value = index
+                                    Value = i
                                 });
 
                                 triangles.Add(new Triangle
                                 {
-                                    Value = index + 1
+                                    Value = i + 1 + count
                                 });
 
                                 triangles.Add(new Triangle
                                 {
-                                    Value = index + 1 + count
+                                    Value = i + 1
                                 });
 
 
                                 // Second triangle
                                 triangles.Add(new Triangle
                                 {
-                                    Value = index
+                                    Value = i
                                 });
 
                                 triangles.Add(new Triangle
                                 {
-                                    Value = index + 1 + count
+                                    Value = i + count
                                 });
 
                                 triangles.Add(new Triangle
                                 {
-                                    Value = index + count
+                                    Value = i + 1 + count
                                 });
                             }
                         }

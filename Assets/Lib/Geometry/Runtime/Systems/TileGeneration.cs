@@ -59,15 +59,15 @@ namespace FunkySheep.Geometry
 
                         triangles.Add(new Triangle
                         {
-                            Value = i + 1
+                            Value = i + 1 + count
                         });
 
                         triangles.Add(new Triangle
                         {
-                            Value = i + 1 + count
+                            Value = i + 1
                         });
 
-                       
+
                         // Second triangle
                         triangles.Add(new Triangle
                         {
@@ -76,12 +76,12 @@ namespace FunkySheep.Geometry
 
                         triangles.Add(new Triangle
                         {
-                            Value = i + 1 + count
+                            Value = i + count
                         });
 
                         triangles.Add(new Triangle
                         {
-                            Value = i + count
+                            Value = i + 1 + count
                         });
                     }
                 }

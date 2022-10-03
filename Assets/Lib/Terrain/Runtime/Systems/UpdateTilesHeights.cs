@@ -25,13 +25,13 @@ namespace FunkySheep.Terrain
             {
                 float step = tileSize / Mathf.Sqrt(pixelComponents.Length);
 
-                for (int z = 0; z < Mathf.Sqrt(pixelComponents.Length); z++)
+                for (int x = 0; x < Mathf.Sqrt(pixelComponents.Length); x++)
                 {
-                    for (int x = 0; x < Mathf.Sqrt(pixelComponents.Length); x++)
+                    for (int z = 0; z < Mathf.Sqrt(pixelComponents.Length); z++)
                     {
                         Color32 color = pixelComponents[
                             z +
-                            x * (int)Mathf.Sqrt(pixelComponents.Length)
+                            x * (int)Mathf.Sqrt(pixelComponents.Length) // x and z are inverted since images muse be rotated
                         ].Value;
 
                         float height = GetHeightFromColor(color, x, z);
@@ -39,7 +39,7 @@ namespace FunkySheep.Terrain
                         {
                             Value = new float3
                             {
-                                x = z, // x and z are inverted since images muse be rotated
+                                x = z, 
                                 y = height,
                                 z = x
                             }
