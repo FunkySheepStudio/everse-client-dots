@@ -8,7 +8,7 @@ namespace FunkySheep.Terrain
 {
     public class MapDownloader : MonoBehaviour
     {
-        public String urlTemplate;
+        //public String urlTemplate;
         public GameObject tilePrefab;
         [HideInInspector]
         public Entity tileEntity;

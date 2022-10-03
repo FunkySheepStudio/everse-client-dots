@@ -4,11 +4,11 @@ using Unity.Mathematics;
 using FunkySheep.Images;
 using FunkySheep.Geometry;
 using FunkySheep.Maps;
+using Unity.Transforms;
 
 namespace FunkySheep.Terrain
 {
-    [DisableAutoCreation]
-    public partial class UpdateTileHeights : SystemBase
+    public partial class UpdateHeights : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
 
@@ -22,7 +22,9 @@ namespace FunkySheep.Terrain
             EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
             float tileSize = GetSingleton<MapSingletonComponent>().tileSize;
 
-            Entities.ForEach((Entity entity, int entityInQueryIndex, ref DynamicBuffer<TileDataComponent> tileDataComponents, in DynamicBuffer<PixelComponent> pixelComponents) =>
+            MapSingletonComponent mapSingleton = GetSingleton<MapSingletonComponent>();
+
+            Entities.ForEach((Entity entity, int entityInQueryIndex, in DynamicBuffer<PixelComponent> pixelComponents, in HeightPrefab heightPrefab, in MapPositionComponent mapPosition) =>
             {
                 float step = tileSize / Mathf.Sqrt(pixelComponents.Length);
 
@@ -31,25 +33,29 @@ namespace FunkySheep.Terrain
                     for (int z = 0; z < Mathf.Sqrt(pixelComponents.Length); z++)
                     {
                         Color32 color = pixelComponents[
-                            z +
-                            x * (int)Mathf.Sqrt(pixelComponents.Length) // x and z are inverted since images muse be rotated
+                            x +
+                            z * (int)Mathf.Sqrt(pixelComponents.Length) // x and z are inverted since images muse be rotated
                         ].Value;
 
                         float height = GetHeightFromColor(color, x, z);
-                        tileDataComponents.Add(new TileDataComponent
+
+                        Entity heightEntity = ecb.Instantiate(entityInQueryIndex, heightPrefab.Value);
+
+                        float3 tilePosition = new float3
                         {
-                            Value = new float3
-                            {
-                                x = z, 
-                                y = height,
-                                z = x
-                            }
+                            x = ((mapPosition.Value.x - (int)mapSingleton.initialMapPosition.x) * mapSingleton.tileSize + mapSingleton.initialOffset.x * mapSingleton.tileSize) + x * (mapSingleton.tileSize / 256),
+                            y = height,
+                            z = (((int)mapSingleton.initialMapPosition.y - mapPosition.Value.y) * mapSingleton.tileSize + mapSingleton.initialOffset.y * mapSingleton.tileSize) + z * (mapSingleton.tileSize / 256)
+                        };
+
+                        ecb.SetComponent<Translation>(entityInQueryIndex, heightEntity, new Translation
+                        {
+                            Value = tilePosition
                         });
                     }
                 }
 
-                ecb.RemoveComponent<PixelComponent>(entityInQueryIndex, entity);
-                ecb.AddComponent<TileMapUpdateComponentTag>(entityInQueryIndex, entity);
+                ecb.DestroyEntity(entityInQueryIndex, entity);
             }).ScheduleParallel();
 
             m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);

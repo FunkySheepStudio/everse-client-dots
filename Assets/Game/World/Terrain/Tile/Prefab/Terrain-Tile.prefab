@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 1009380216022593738}
   - component: {fileID: 1313472819740928216}
   - component: {fileID: 5127171410765928562}
+  - component: {fileID: 2998132101384742125}
   m_Layer: 0
   m_Name: Terrain-Tile
   m_TagString: Untagged
@@ -179,3 +180,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35c008ba863f96d42a466cffef01ff25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2998132101384742125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9056102607534595074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e66b528fe6572d4c86335bac433e247, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Value: {fileID: 8746428169989022340, guid: cc78407a9081b3d4d8ae0b82cb6dcf9d, type: 3}

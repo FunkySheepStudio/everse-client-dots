@@ -12,6 +12,7 @@ namespace FunkySheep.Terrain
 {
     public class HeightMapDownloader : MapDownloader
     {
+        public GameObject heightPrefab;
         public override void Process(string fileId, Texture2D texture, MapSingletonComponent mapSingleton, MapPositionComponent mapPosition)
         {
             NativeArray<PixelComponent> pixelBuffer = new NativeArray<PixelComponent>();
@@ -33,6 +34,9 @@ namespace FunkySheep.Terrain
                     y = (int)mapSingleton.initialMapPosition.y - mapPosition.Value.y
                 }
             });
+
+            entityManager.AddComponent<MapPositionComponent>(entity);
+            entityManager.SetComponentData<MapPositionComponent>(entity, mapPosition);
 
             float3 tilePosition = new float3
             {
