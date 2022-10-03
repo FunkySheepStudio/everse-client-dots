@@ -6,6 +6,7 @@ using UnityEngine.Rendering;
 
 namespace FunkySheep.Geometry
 {
+    [DisableAutoCreation]
     public partial class MeshUpdateSystem : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;

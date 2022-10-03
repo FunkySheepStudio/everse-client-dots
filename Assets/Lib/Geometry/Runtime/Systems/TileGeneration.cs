@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace FunkySheep.Geometry
 {
+    [DisableAutoCreation]
     public partial class TileGeneration : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;

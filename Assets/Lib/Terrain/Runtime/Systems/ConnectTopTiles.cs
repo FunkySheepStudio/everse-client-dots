@@ -7,6 +7,7 @@ using FunkySheep.Maps;
 
 namespace FunkySheep.Terrain
 {
+    [DisableAutoCreation]
     public partial class ConnectTopTiles : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
