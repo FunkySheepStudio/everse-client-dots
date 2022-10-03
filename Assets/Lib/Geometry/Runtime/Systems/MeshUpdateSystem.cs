@@ -26,6 +26,7 @@ namespace FunkySheep.Geometry
                     var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
                     Mesh mesh = new Mesh();
+                    mesh.indexFormat = IndexFormat.UInt32;
                     mesh.Clear();
                     mesh.SetVertices(vertexBuffer.AsNativeArray().Reinterpret<Vector3>());
                     mesh.SetIndices(trianglesBuffer.AsNativeArray(), MeshTopology.Triangles, 0);

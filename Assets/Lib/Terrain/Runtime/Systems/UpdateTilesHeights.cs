@@ -39,7 +39,7 @@ namespace FunkySheep.Terrain
                         {
                             Value = new float3
                             {
-                                x = z,
+                                x = z, // x and z are inverted since images muse be rotated
                                 y = height,
                                 z = x
                             }

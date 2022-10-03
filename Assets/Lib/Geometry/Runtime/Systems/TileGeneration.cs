@@ -23,9 +23,9 @@ namespace FunkySheep.Geometry
                 DynamicBuffer<Triangle> triangles = GetBuffer<Triangle>(entity);
                 DynamicBuffer<Uv> uvs = GetBuffer<Uv>(entity);
 
+                int count = (int)Mathf.Sqrt(tileDataComponent.Length);
                 for (int i = 0; i < tileDataComponent.Length; i++)
                 {
-                    int count = (int)Mathf.Sqrt(tileDataComponent.Length);
                     float x = tileDataComponent[i].Value.x;
                     float y = tileDataComponent[i].Value.y;
                     float z = tileDataComponent[i].Value.z;
@@ -49,7 +49,7 @@ namespace FunkySheep.Geometry
                     });
 
                     //Triangles
-                    if (x != (count - 1) && z != (count - 1))
+                    if (x <= (count - 2) && z <= (count - 2))
                     {
                         // First triangle
                         triangles.Add(new Triangle
@@ -64,7 +64,7 @@ namespace FunkySheep.Geometry
 
                         triangles.Add(new Triangle
                         {
-                            Value = i + count + 1
+                            Value = i + 1 + count
                         });
 
                        
@@ -76,7 +76,7 @@ namespace FunkySheep.Geometry
 
                         triangles.Add(new Triangle
                         {
-                            Value = i + count + 1
+                            Value = i + 1 + count
                         });
 
                         triangles.Add(new Triangle
@@ -88,6 +88,7 @@ namespace FunkySheep.Geometry
                 //ecb.RemoveComponent<TileDataComponent>(entityInQueryIndex, entity);
                 ecb.RemoveComponent<TileMapUpdateComponentTag>(entityInQueryIndex, entity);
                 ecb.AddComponent<MeshUpdateTag>(entityInQueryIndex, entity);
+                ecb.AddComponent<TileMapGeneratedComponentTag>(entityInQueryIndex, entity);
             }).Schedule();
 
             m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);

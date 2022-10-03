@@ -26,7 +26,12 @@ namespace FunkySheep.Terrain
 
             entityManager.SetComponentData<TileComponent>(entity, new TileComponent
             {
-                step = mapSingleton.tileSize / 256
+                step = mapSingleton.tileSize / 256,
+                gridPosition = new int2
+                {
+                    x = (mapPosition.Value.x - (int)mapSingleton.initialMapPosition.x),
+                    y = (int)mapSingleton.initialMapPosition.y - mapPosition.Value.y
+                }
             });
 
             float3 tilePosition = new float3

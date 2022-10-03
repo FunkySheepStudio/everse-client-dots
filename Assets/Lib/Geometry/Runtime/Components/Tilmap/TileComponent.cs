@@ -1,5 +1,5 @@
-using System;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace FunkySheep.Geometry
 {
@@ -7,5 +7,6 @@ namespace FunkySheep.Geometry
     public struct TileComponent : IComponentData
     {
         public float step;
+        public int2 gridPosition;
     }
 }
