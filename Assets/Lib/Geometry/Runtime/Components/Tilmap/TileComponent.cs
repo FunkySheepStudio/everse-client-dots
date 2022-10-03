@@ -6,8 +6,6 @@ namespace FunkySheep.Geometry
     [GenerateAuthoringComponent]
     public struct TileComponent : IComponentData
     {
-        public int size;
-        public int count;
-        public bool created;
+        public float step;
     }
 }

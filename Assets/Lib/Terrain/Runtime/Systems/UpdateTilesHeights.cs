@@ -25,9 +25,9 @@ namespace FunkySheep.Terrain
             {
                 float step = tileSize / Mathf.Sqrt(pixelComponents.Length);
 
-                for (int x = 0; x < Mathf.Sqrt(pixelComponents.Length); x++)
+                for (int z = 0; z < Mathf.Sqrt(pixelComponents.Length); z++)
                 {
-                    for (int z = 0; z < Mathf.Sqrt(pixelComponents.Length); z++)
+                    for (int x = 0; x < Mathf.Sqrt(pixelComponents.Length); x++)
                     {
                         Color32 color = pixelComponents[
                             z +
@@ -39,9 +39,9 @@ namespace FunkySheep.Terrain
                         {
                             Value = new float3
                             {
-                                x = x,
+                                x = z,
                                 y = height,
-                                z = z
+                                z = x
                             }
                         });
                     }

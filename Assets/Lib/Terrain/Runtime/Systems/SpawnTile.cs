@@ -16,7 +16,7 @@ namespace FunkySheep.Terrain
 
         protected override void OnUpdate()
         {
-            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawnerComponent tileSpawner, in TilePositionComponent tilePositionComponent, in MapPositionComponent mapPosition) =>
+            Entities.ForEach((Entity entity, int entityInQueryIndex, ref TileSpawnerComponent tileSpawner, in MapPositionComponent mapPosition) =>
             {
                 MapSingletonComponent mapSingleton = GetSingleton<MapSingletonComponent>();
 
@@ -24,8 +24,7 @@ namespace FunkySheep.Terrain
                 {
                     tileSpawner.currentPosition = mapPosition.Value;
 
-                    string url = $"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{mapSingleton.zoomLevel}/{mapPosition.Value.x}/{mapPosition.Value.y}.png";
-                    heightMapDownloader.Download(url);
+                    heightMapDownloader.Download(mapSingleton, mapPosition);
                 }
 
             })

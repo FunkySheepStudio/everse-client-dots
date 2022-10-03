@@ -27,7 +27,7 @@ namespace FunkySheep.Maps
 
                 mapPosition.Value = new int2(
                   Mathf.FloorToInt(initialMapPosition.x) + tilePosition.Value.x,
-                  Mathf.FloorToInt(initialMapPosition.y) - tilePosition.Value.y
+                  Mathf.FloorToInt(initialMapPosition.y) - tilePosition.Value.y // Reverse since Y axis is reversed
                 );
 
                 mapPositions[i] = mapPosition;

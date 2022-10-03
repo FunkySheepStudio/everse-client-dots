@@ -17,7 +17,7 @@ namespace FunkySheep.Geometry
         {
             EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
-            Entities.ForEach((Entity entity, int entityInQueryIndex, in TileComponent tileCompoent, in DynamicBuffer<TileDataComponent> tileDataComponent, in TileMapUpdateComponentTag tileMapUpdateComponentTag) =>
+            Entities.ForEach((Entity entity, int entityInQueryIndex, in TileComponent tileComponent, in DynamicBuffer<TileDataComponent> tileDataComponent, in TileMapUpdateComponentTag tileMapUpdateComponentTag) =>
             {
                 DynamicBuffer<Vertex> vertices = GetBuffer<Vertex>(entity);
                 DynamicBuffer<Triangle> triangles = GetBuffer<Triangle>(entity);
@@ -31,7 +31,12 @@ namespace FunkySheep.Geometry
                     float z = tileDataComponent[i].Value.z;
 
                     // indexes
-                    vertices.Add(new Vertex { Value = tileDataComponent[i].Value });
+                    vertices.Add(new Vertex { Value = new float3 {
+                        x = tileDataComponent[i].Value.x * tileComponent.step,
+                        y = tileDataComponent[i].Value.y,
+                        z = tileDataComponent[i].Value.z * tileComponent.step,
+                    }
+                    });
 
                     // Uvs
                     uvs.Add(new Uv
