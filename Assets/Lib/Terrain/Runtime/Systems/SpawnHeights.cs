@@ -21,7 +21,7 @@ namespace FunkySheep.Terrain
             MapSingletonComponent mapSingleton = GetSingleton<MapSingletonComponent>();
             EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
-            Entities.ForEach((Entity entity, int entityInQueryIndex, in DynamicBuffer<PixelComponent> pixelComponents, in HeightPrefab heightPrefab, in MapPositionComponent mapPosition) =>
+            Entities.ForEach((Entity entity, int entityInQueryIndex, in DynamicBuffer<PixelComponent> pixelComponents, in HeightPrefab heightPrefab, in TilePositionComponent tilePosition) =>
             {
                 float step = mapSingleton.tileSize / Mathf.Sqrt(pixelComponents.Length);
 
@@ -38,16 +38,18 @@ namespace FunkySheep.Terrain
 
                         Entity heightEntity = ecb.Instantiate(entityInQueryIndex, heightPrefab.Value);
 
-                        float3 tilePosition = new float3
+                        ecb.SetComponent<TilePositionComponent>(entityInQueryIndex, heightEntity, tilePosition);
+
+                        float3 worldPosition = new float3
                         {
-                            x = ((mapPosition.Value.x - (int)mapSingleton.initialMapPosition.x) * mapSingleton.tileSize + mapSingleton.initialOffset.x * mapSingleton.tileSize) + x * (mapSingleton.tileSize / 256),
+                            x = (tilePosition.Value.x * mapSingleton.tileSize + mapSingleton.initialOffset.x * mapSingleton.tileSize) + x * (mapSingleton.tileSize / 256),
                             y = height,
-                            z = (((int)mapSingleton.initialMapPosition.y - mapPosition.Value.y) * mapSingleton.tileSize + mapSingleton.initialOffset.y * mapSingleton.tileSize) + z * (mapSingleton.tileSize / 256)
+                            z = (tilePosition.Value.y * mapSingleton.tileSize + mapSingleton.initialOffset.y * mapSingleton.tileSize) + z * (mapSingleton.tileSize / 256)
                         };
 
                         ecb.SetComponent<Translation>(entityInQueryIndex, heightEntity, new Translation
                         {
-                            Value = tilePosition
+                            Value = worldPosition
                         });
 
                         ecb.RemoveComponent<PixelComponent>(entityInQueryIndex, entity);
