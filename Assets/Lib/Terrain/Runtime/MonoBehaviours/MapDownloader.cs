@@ -26,7 +26,7 @@ namespace FunkySheep.Terrain
             tileEntity = GameObjectConversionUtility.ConvertGameObjectHierarchy(tilePrefab, convertionSettings);
         }
 
-        public void Download(MapSingletonComponent mapSingleton, MapPositionComponent mapPosition)
+        public virtual void Download(MapSingletonComponent mapSingleton, MapPositionComponent mapPosition)
         {
             string url = $"https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{mapSingleton.zoomLevel}/{mapPosition.Value.x}/{mapPosition.Value.y}.png";
 

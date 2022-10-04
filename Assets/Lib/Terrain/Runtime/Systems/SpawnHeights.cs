@@ -2,13 +2,12 @@ using UnityEngine;
 using Unity.Entities;
 using Unity.Mathematics;
 using FunkySheep.Images;
-using FunkySheep.Geometry;
 using FunkySheep.Maps;
 using Unity.Transforms;
 
 namespace FunkySheep.Terrain
 {
-    public partial class UpdateHeights : SystemBase
+    public partial class SpawnHeights : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
 
@@ -19,14 +18,12 @@ namespace FunkySheep.Terrain
 
         protected override void OnUpdate()
         {
-            EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
-            float tileSize = GetSingleton<MapSingletonComponent>().tileSize;
-
             MapSingletonComponent mapSingleton = GetSingleton<MapSingletonComponent>();
+            EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities.ForEach((Entity entity, int entityInQueryIndex, in DynamicBuffer<PixelComponent> pixelComponents, in HeightPrefab heightPrefab, in MapPositionComponent mapPosition) =>
             {
-                float step = tileSize / Mathf.Sqrt(pixelComponents.Length);
+                float step = mapSingleton.tileSize / Mathf.Sqrt(pixelComponents.Length);
 
                 for (int x = 0; x < Mathf.Sqrt(pixelComponents.Length); x++)
                 {
@@ -52,10 +49,10 @@ namespace FunkySheep.Terrain
                         {
                             Value = tilePosition
                         });
+
+                        ecb.RemoveComponent<PixelComponent>(entityInQueryIndex, entity);
                     }
                 }
-
-                ecb.DestroyEntity(entityInQueryIndex, entity);
             }).ScheduleParallel();
 
             m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);

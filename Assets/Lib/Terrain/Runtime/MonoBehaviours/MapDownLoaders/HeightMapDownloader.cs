@@ -3,16 +3,24 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 using Unity.Collections;
-using FunkySheep.Network;
 using FunkySheep.Images;
 using FunkySheep.Maps;
-using FunkySheep.Geometry;
+using System.Collections.Generic;
 
 namespace FunkySheep.Terrain
 {
     public class HeightMapDownloader : MapDownloader
     {
-        public GameObject heightPrefab;
+        List<MapPositionComponent> currentMapPositions = new List<MapPositionComponent>();
+
+        public override void Download(MapSingletonComponent mapSingleton, MapPositionComponent mapPosition)
+        {
+            if (!currentMapPositions.Contains(mapPosition))
+            {
+                base.Download(mapSingleton, mapPosition);
+            }
+        }
+
         public override void Process(string fileId, Texture2D texture, MapSingletonComponent mapSingleton, MapPositionComponent mapPosition)
         {
             NativeArray<PixelComponent> pixelBuffer = new NativeArray<PixelComponent>();
@@ -21,34 +29,9 @@ namespace FunkySheep.Terrain
             pixelBuffer = texture.GetRawTextureData<PixelComponent>();
 
             Entity entity = entityManager.Instantiate(tileEntity);
-            entityManager.AddBuffer<PixelComponent>(entity);
             entityManager.GetBuffer<PixelComponent>(entity).CopyFrom(pixelBuffer.ToArray());
-            entityManager.AddBuffer<TileDataComponent>(entity);
-
-            entityManager.SetComponentData<TileComponent>(entity, new TileComponent
-            {
-                step = mapSingleton.tileSize / 256,
-                gridPosition = new int2
-                {
-                    x = (mapPosition.Value.x - (int)mapSingleton.initialMapPosition.x),
-                    y = (int)mapSingleton.initialMapPosition.y - mapPosition.Value.y
-                }
-            });
-
-            entityManager.AddComponent<MapPositionComponent>(entity);
             entityManager.SetComponentData<MapPositionComponent>(entity, mapPosition);
-
-            float3 tilePosition = new float3
-            {
-                x = (mapPosition.Value.x - (int)mapSingleton.initialMapPosition.x) * mapSingleton.tileSize + mapSingleton.initialOffset.x * mapSingleton.tileSize,
-                y = 0,
-                z = ((int)mapSingleton.initialMapPosition.y - mapPosition.Value.y) * mapSingleton.tileSize + mapSingleton.initialOffset.y * mapSingleton.tileSize
-            };
-
-            entityManager.SetComponentData<Translation>(entity, new Translation
-            {
-                Value = tilePosition
-            });
+            currentMapPositions.Add(mapPosition);
         }
     }
 
