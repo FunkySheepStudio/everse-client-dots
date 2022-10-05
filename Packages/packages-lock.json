@@ -298,6 +298,13 @@
       },
       "url": "https://registry.npmjs.org"
     },
+    "net.funkysheep.unity.osm": {
+      "version": "0.1.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://registry.npmjs.org"
+    },
     "net.funkysheep.unity.simplejson": {
       "version": "0.1.0",
       "depth": 1,

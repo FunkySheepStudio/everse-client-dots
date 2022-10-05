@@ -208,6 +208,27 @@ namespace FunkySheep.Maps
         }
 
         /// <summary>
+        /// Calculate the GPS boundaries of a tile depending on zoom size and the position on the map
+        /// </summary>
+        /// <returns>A Double[4] containing [StartLatitude, StartLongitude, EndLatitude, EndLongitude]</returns>
+        public static Double[] CaclulateGpsBoundaries(int zoom, int2 mapPosition)
+        {
+            double startlatitude = Utils.tileZ2lat(zoom, mapPosition.y + 1);
+            double startlongitude = Utils.tileX2long(zoom, mapPosition.x);
+            double endLatitude = Utils.tileZ2lat(zoom, mapPosition.y);
+            double endLongitude = Utils.tileX2long(zoom, mapPosition.x + 1);
+
+            Double[] boundaries = new Double[4];
+
+            boundaries[0] = startlatitude;
+            boundaries[1] = startlongitude;
+            boundaries[2] = endLatitude;
+            boundaries[3] = endLongitude;
+
+            return boundaries;
+        }
+
+        /// <summary>
         /// Convert from color channel values in 0.0-1.0 range to elevation in meters:
         /// 21768
         /// 

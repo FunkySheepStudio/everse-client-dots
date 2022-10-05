@@ -10,11 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 9056102607534595102}
   - component: {fileID: 9056102607534595100}
-  - component: {fileID: 7975120746866620837}
-  - component: {fileID: 2998132101384742125}
+  - component: {fileID: 4424957542009069953}
   - component: {fileID: 8674359133917584142}
   m_Layer: 0
-  m_Name: Terrain-Tile
+  m_Name: Buildings-Tile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ConversionMode: 0
---- !u!114 &7975120746866620837
+--- !u!114 &4424957542009069953
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -57,23 +56,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 9056102607534595074}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2d8408feaf0c5347a34a9a057cda6c8, type: 3}
+  m_Script: {fileID: 11500000, guid: 4fa83ed31a2e4514eaa03bd6d5285ea2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Values: []
---- !u!114 &2998132101384742125
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9056102607534595074}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e66b528fe6572d4c86335bac433e247, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Value: {fileID: 8746428169989022340, guid: cc78407a9081b3d4d8ae0b82cb6dcf9d, type: 3}
+  Value: {fileID: 8746428169989022340, guid: 7b9fcb540e1c08841a874f9966efaf31, type: 3}
 --- !u!114 &8674359133917584142
 MonoBehaviour:
   m_ObjectHideFlags: 0
