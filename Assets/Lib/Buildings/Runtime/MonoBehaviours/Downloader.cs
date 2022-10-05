@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System;
 using FunkySheep.OSM.Ecs;
 using Unity.Mathematics;
+using FunkySheep.Geometry;
 
 namespace FunkySheep.Buildings
 {
@@ -82,15 +83,42 @@ namespace FunkySheep.Buildings
                 foreach (FunkySheep.OSM.Way way in parsedData.ways)
                 {
                     //Building building = new Building(way.id);
+                   
 
-                    for (int i = 0; i < way.nodes.Count - 1; i++)
+                    for (int i = 0; i < way.nodes.Count; i++)
                     {
+                        double2 point = new double2
+                        {
+                            x = way.nodes[i].latitude,
+                            y = way.nodes[i].longitude
+                        };
+
+                        /*if (i > 0)
+                        {
+                            double2 previousPoint = new double2
+                            {
+                                x = way.nodes[(i - 1) % (way.nodes.Count - 1)].latitude,
+                                y = way.nodes[(i - 1) % (way.nodes.Count - 1)].longitude
+                            };
+
+
+                            double2 nextPoint = new double2
+                            {
+                                x = way.nodes[(i + 1) % (way.nodes.Count - 1)].latitude,
+                                y = way.nodes[(i + 1) % (way.nodes.Count - 1)].longitude
+                            };
+
+
+                            if (math.abs(Geometry.Utils.AngleBetween(previousPoint, point, nextPoint)) < 10 && i > 0)
+                            {
+                                Debug.Log("Discard");
+                                break;
+                            }
+                        }*/
+
                         nodes.Enqueue(new OsmNodeGpsPosition
                         {
-                            Value = new double2 {
-                                x = way.nodes[i].latitude,
-                                y = way.nodes[i].longitude
-                            }
+                            Value = point
                         });
                         //Vector2 point = earthManager.CalculatePosition(way.nodes[i].latitude, way.nodes[i].longitude);
                         //building.points.Add(point);
