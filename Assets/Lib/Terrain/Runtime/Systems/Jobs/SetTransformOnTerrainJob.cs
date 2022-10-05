@@ -56,7 +56,17 @@ namespace FunkySheep.Terrain
                     }
                 }
 
-                translation.Value.y = heightTranslations[closeHeightAIndex].Value.y + 10;
+                float distA = math.distance(heightTranslations[closeHeightAIndex].Value, translation.Value);
+                float distB = math.distance(heightTranslations[closeHeightBIndex].Value, translation.Value);
+                float distC = math.distance(heightTranslations[closeHeightCIndex].Value, translation.Value);
+
+                float height = heightTranslations[closeHeightAIndex].Value.y * distA +
+                    heightTranslations[closeHeightBIndex].Value.y * distB +
+                    heightTranslations[closeHeightCIndex].Value.y * distC;
+
+                height /= (distA + distB + distC);
+
+                translation.Value.y = height + 10;
                 translations[i] = translation;
             }
         }
