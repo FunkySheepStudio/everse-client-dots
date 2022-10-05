@@ -1,8 +1,6 @@
 using Unity.Entities;
 using Unity.Transforms;
 using Unity.Collections;
-using Unity.Mathematics;
-using FunkySheep.Geometry;
 using Unity.Jobs;
 
 namespace FunkySheep.Terrain
@@ -10,67 +8,37 @@ namespace FunkySheep.Terrain
     public partial class SetTransformOnTerrain : SystemBase
     {
         EndSimulationEntityCommandBufferSystem m_EndSimulationEcbSystem;
+        private EntityQuery query;
 
         protected override void OnCreate()
         {
             m_EndSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
-
+            this.query = GetEntityQuery(typeof(Translation), typeof(SetTransformOnTerrainComponentTag));
         }
 
 
         protected override void OnUpdate()
         {
             NativeArray<Translation> heightsTranslations = GetEntityQuery(typeof(HeightComponentTag), typeof(Translation)).ToComponentDataArray<Translation>(Allocator.TempJob);
-            EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
-            Entities.ForEach((Entity entity, int entityInQueryIndex, ref Translation translation, in SetTransformOnTerrainComponentTag setTransformOnTerrainComponentTag) =>
+            SetTransformOnTerrainJob setTransformOnTerrainJob = new SetTransformOnTerrainJob
             {
-                int closeHeightAIndex = 0;
-                int closeHeightBIndex = 0;
-                int closeHeightCIndex = 0;
+                translationType = GetComponentTypeHandle<Translation>(),
+                heightTranslations = heightsTranslations
+            };
 
-                float2 currentPoint = new float2
-                {
-                    x = translation.Value.x,
-                    y = translation.Value.z,
-                };
+            JobHandle setHeightsHandle = setTransformOnTerrainJob.ScheduleParallel(this.query, this.Dependency);
+            Dependency = JobHandle.CombineDependencies(Dependency, setHeightsHandle, heightsTranslations.Dispose(setHeightsHandle));
 
-                for (int i = 1; i < heightsTranslations.Length; i++)
-                {
-                    float2 currentClosest = new float2
-                    {
-                        x = heightsTranslations[closeHeightAIndex].Value.x,
-                        y = heightsTranslations[closeHeightAIndex].Value.z,
-                    };
-
-                    float2 tryClosest = new float2
-                    {
-                        x = heightsTranslations[i].Value.x,
-                        y = heightsTranslations[i].Value.z,
-                    };
-
-                    // Insert the newest point if closer tha the old one
-                    if (!Utils.ClosestPoint(currentPoint, currentClosest, tryClosest).Equals(currentClosest))
-                    {
-                        closeHeightCIndex = closeHeightBIndex;
-                        closeHeightBIndex = closeHeightAIndex;
-                        closeHeightAIndex = i;
-                    }
-
-                }
-
-                translation.Value.y = heightsTranslations[closeHeightAIndex].Value.y + 10;
-
+            // Remove the init component
+            EntityCommandBuffer.ParallelWriter ecb = m_EndSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
+            this.Dependency = Entities.ForEach((Entity entity, int entityInQueryIndex, in SetTransformOnTerrainComponentTag setTransformOnTerrainComponentTag) =>
+            {
                 ecb.RemoveComponent<SetTransformOnTerrainComponentTag>(entityInQueryIndex, entity);
+            }).ScheduleParallel(setHeightsHandle);
 
-            })
-            .Schedule();
 
             m_EndSimulationEcbSystem.AddJobHandleForProducer(this.Dependency);
-
-            Dependency = JobHandle.CombineDependencies(Dependency, heightsTranslations.Dispose(Dependency));
         }
-
-        
     }
 }
