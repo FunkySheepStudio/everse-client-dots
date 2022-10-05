@@ -1,6 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using FunkySheep.Maps;
+using FunkySheep.Terrain;
 using Unity.Transforms;
 
 namespace FunkySheep.OSM.Ecs
@@ -39,6 +40,7 @@ namespace FunkySheep.OSM.Ecs
                     }
                 });
 
+                ecb.AddComponent<SetTransformOnTerrainComponentTag>(entityInQueryIndex, entity);
                 ecb.RemoveComponent<OsmNodeGpsPosition>(entityInQueryIndex, entity);
             }).ScheduleParallel();
 

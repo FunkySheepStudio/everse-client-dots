@@ -53,6 +53,7 @@ namespace FunkySheep.Terrain
                         });
 
                         ecb.RemoveComponent<PixelComponent>(entityInQueryIndex, entity);
+                        ecb.AddComponent<HeightComponentTag>(entityInQueryIndex, entity);
                     }
                 }
             }).ScheduleParallel();
