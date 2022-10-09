@@ -22,6 +22,7 @@ namespace FunkySheep.Terrain
             entityManager.SetName(tilePrefab, "Terrain - Heights - Prefab");
             entityManager.AddComponent<Prefab>(tilePrefab);
             entityManager.AddComponent<EarthGridPosition>(tilePrefab);
+            entityManager.AddBuffer<AdjacentTiles>(tilePrefab);
         }
 
         public void DownloadAtGridPosition(EarthGridPosition earthGridPosition)
@@ -105,14 +106,21 @@ namespace FunkySheep.Terrain
             adjacentTiles.Add(new EarthGridPosition { Value = entityGridPosition.Value + new int2 { x = -1, y = 1 } });
             adjacentTiles.Add(new EarthGridPosition { Value = entityGridPosition.Value + new int2 { x = 1, y = -1 } });
 
-            foreach (EarthGridPosition adjacentTile in adjacentTiles)
+            foreach (EarthGridPosition newAdjacentTile in adjacentTiles)
             {
-                if (spawnedEarthTiles.Find(entity => entityManager.GetComponentData<EarthGridPosition>(entity).Value.Equals(adjacentTile.Value)) == Entity.Null)
+                Entity adjacentTile = spawnedEarthTiles.Find(entity => entityManager.GetComponentData<EarthGridPosition>(entity).Value.Equals(newAdjacentTile.Value));
+                if (adjacentTile == Entity.Null)
                 {
                     Entity newEntity = entityManager.Instantiate(tilePrefab);
-                    entityManager.SetComponentData<EarthGridPosition>(newEntity, adjacentTile);
+                    entityManager.SetComponentData<EarthGridPosition>(newEntity, newAdjacentTile);
                     spawnedEarthTiles.Add(newEntity);
+                    entityManager.GetBuffer<AdjacentTiles>(newEntity).Add(new AdjacentTiles { entity = entity });
+                    entityManager.GetBuffer<AdjacentTiles>(entity).Add(new AdjacentTiles { entity = newEntity });
                     base.Download(newEntity);
+                } else
+                {
+                    entityManager.GetBuffer<AdjacentTiles>(adjacentTile).Add(new AdjacentTiles { entity = entity });
+                    entityManager.GetBuffer<AdjacentTiles>(entity).Add(new AdjacentTiles { entity = adjacentTile });
                 }
             }
             
